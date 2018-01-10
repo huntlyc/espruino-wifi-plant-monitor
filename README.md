@@ -38,3 +38,6 @@ The Espruino code sends a standard POST with form data so any server side softwa
 * __auth__: "YOUR_SUPER_SECRET_TOKEN"
 * __moisture__: integer value
 * __temperature__: double value
+
+
+__note__: for my setup, on the espruino I've taken my "token" and run it through a sha256() function.  The server side software also does this, so either sha256() your own key and include it in the source code or just keep your key as-is and remove the sha256() from the php file.
