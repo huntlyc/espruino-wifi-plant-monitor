@@ -1,7 +1,7 @@
 /**!
  *
- * Espruino WIFI Plant Monitoring System
- * =====================================
+ * Espurino Plant Monitoring System
+ * ========================
  * Created 2018-01-10 by Huntly Cameron <huntly.cameron@gmail.com>
  *
  * Simple soil moisture and ambient temperature monitoring system.
@@ -23,21 +23,27 @@
  *
  **/
 
+var CODE_DEBUG = false;
 
 function NetworkSave(data){
-    this.data = data;
     var _self = this;
 
-    var WIFI_NAME = "ESSID";
-    var WIFI_OPTIONS = { password : "PWD" };
+    this.data = data;
 
-    var wifi = require("EspruinoWiFi");
-    wifi.connect(WIFI_NAME, WIFI_OPTIONS, function(err) {
+    var WIFI_NAME = "ESSID";
+    var WIFI_OPTIONS = { password : "WIFI_PWD" };
+
+    this.wifi = require("EspruinoWiFi");
+    this.wifi.connect(WIFI_NAME, WIFI_OPTIONS, function(err) {
         if (err) {
-            console.log("Connection error: "+err);
+            if(CODE_DEBUG){
+                console.log("Connection error: "+err);
+            }
             return;
+        }else if(CODE_DEBUG){
+            console.log("Connected!");
         }
-        console.log("Connected!");
+
         _self.sendInfo(_self.data);
     });
 }
@@ -52,33 +58,40 @@ NetworkSave.prototype.jsonToQueryString = function(json) {
 };
 
 NetworkSave.prototype.sendInfo = function(data){
+    var _self = this;
+
     data.auth = 'YOUR_SUPER_SECRET_TOKEN';
 
     content = this.jsonToQueryString(data);
 
 
     var options = {
-        host: 'server-name.tld',
-        port: 80,
-        protocol: 'http:',
-        //port: 443,
-        //protocol: 'https:',
-        path: '/path/to/endpoint/index.php',
-        method: 'POST',
+        host: 'endpointserver.tld', // host name
+        port: 80,            // (optional) port, defaults to 80
+        protocol: 'http:',   // optional protocol - https: or http:
+        //port: 443,            // (optional) port, defaults to 80
+        //protocol: 'https:',   // optional protocol - https: or http:
+        path: '/path/to/data/app/',           // path sent to server
+        method: 'POST',       // HTTP command sent to server (must be uppercase 'GET', 'POST', etc)
 
 
         headers: {
             "Content-Type":"application/x-www-form-urlencoded",
             "Content-Length":content.length
-        }
+        } // (optional) HTTP headers
     };
 
     var req = require("http").request(options, function(res) {
         res.on('data', function(data) {
-            console.log("HTTP> "+data);
+            if(CODE_DEBUG){
+                console.log("HTTP> "+data);
+            }
         });
         res.on('close', function(data) {
-            console.log("Connection closed");
+            if(CODE_DEBUG){
+                console.log("HTTP Request Closed");
+            }
+            _self.wifi.disconnect();
         });
     }).end(content);
 };
@@ -89,7 +102,7 @@ function PlantMonitor() {
     this.tempSensor = require("DS18B20").connect(this.ow);
 
     //General config
-    this.intervalVal = 300000; //5mins
+    this.intervalVal = 60000; //1min
     this.currentTimeoutID = undefined;
 
     //Start monitoring
@@ -165,6 +178,9 @@ PlantMonitor.prototype.setupNextCheckInterval = function(){
     },this.intervalVal);
 };
 
-
-
-var pm = new PlantMonitor();
+setTimeout(function(){
+    if(CODE_DEBUG){
+      console.log('starting');
+      var pm = new PlantMonitor();
+    }
+},1000);
