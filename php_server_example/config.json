@@ -1,3 +1,6 @@
 {
+    "tempRange": [15, 35],
+    "moistureRange": [35,65],
+    "endpoint": "https://www.yoursite.com/path/to/endpoint/",
     "token": "YOUR_SUPER_SECRET_TOKEN"
 }
