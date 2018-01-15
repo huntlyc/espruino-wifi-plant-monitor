@@ -35,9 +35,13 @@ I've included a PHP example server application that takes this post data and sav
 
 The Espruino code sends a standard POST with form data so any server side software that can read this respone can be used. The post data key value pairs are:
 
-* __auth__: "YOUR_SUPER_SECRET_TOKEN"
+* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the espruino application)
 * __moisture__: integer value
 * __temperature__: double value
 
+To read the information back send a get request with the following parameters:
+* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the espruino application)
+* __output__: (optional) set to "json" for JSON output or leave blank for a human readable output.
 
-__note__: for my setup, on the espruino I've taken my "token" and run it through a sha256() function.  The server side software also does this, so either sha256() your own key and include it in the source code or just keep your key as-is and remove the sha256() from the php file.
+## Bonus: Alexa application
+The sample alexa app in the "alexa_app" folder of this repo is pretty simple, it just queries the example php application and speaks the output whilst then running a second query to the php application for the raw JSON information which is then displayed on a card in the alexa mobile app.

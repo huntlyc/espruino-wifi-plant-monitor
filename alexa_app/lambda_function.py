@@ -86,6 +86,7 @@ def get_plant_info_from_server(json=False):
     if(json == True):
         url += "&type=json"
 
+
     request = urllib2.Request(url=url,data=None,headers={"User-Agent":"Magic Browser"})
     response = urllib2.urlopen(request)
     responseContents = response.read();
@@ -142,8 +143,6 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "AllPlantsIntent":
-        return get_plantInformation(intent, session)
-    elif intent_name == "SinglePlantIntent":
         return get_plantInformation(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()

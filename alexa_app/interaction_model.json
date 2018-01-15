@@ -1,0 +1,31 @@
+{
+  "languageModel": {
+    "intents": [
+      {
+        "name": "AllPlantsIntent",
+        "samples": [
+          "are my chili plants ok",
+          "how are my chilli plants",
+          "how are my chillis",
+          "how are my plants",
+          "how is my plant",
+          "what's the stauts on my plant"
+        ],
+        "slots": []
+      },
+      {
+        "name": "AMAZON.CancelIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.HelpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.StopIntent",
+        "samples": []
+      }
+    ],
+    "invocationName": "chili monitor"
+  }
+}

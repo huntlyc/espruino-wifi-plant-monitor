@@ -58,9 +58,9 @@ EOXML;
          *
          * Possible responses:
          * "All OK"
-         * "Temperature (n) out of range"
-         * "Moisture (n) out of range"
-         * "Temperature (n) and moisture (m) out of range)"
+         * "Temperature out of range"
+         * "Moisture out of range"
+         * "Temperature and moisture (m) out of range)"
          *
          * @param int $t - temperature
          * @param float $m - moisture
@@ -71,19 +71,64 @@ EOXML;
             $roundTemp = round($t) . "&#8451;";
 
             if(!$this->isTempWithinRange($t)){
-                $msg .= "Temperature ({$roundTemp}) out of range";
+                $msg .= "Temperature out of range";
             }
 
             if(!$this->isMoistureWithinRange($m)){
                 if(!empty($msg)){
-                    $msg = "Temperature ({$roundTemp}) and moisture ({$m}) out of range";
+                    $msg = "Temperature and moisture out of range";
                 }else{
-                    $msg .= "Moisture ({$m}) out of range";
+                    $msg .= "Moisture out of range";
                 }
             }
 
             if(empty($msg)){
                 $msg = "All OK";
+            }
+
+            return $msg;
+        }
+
+        /**
+         * detailedDiagnosis(int $t, float $m)
+         *
+         * Checks paramaters to make sure they're ok
+         *
+         * Possible responses:
+         * "Your plants are happy. Good job!"
+         * "Your plants are too cold. They're currently at {$t} degrees celsius."
+         * "Your plants are too hot. They're currently at {$t} degrees celsius."
+         * "Your plants could use a drink... The moisture sensor recorded a value of {$m}"
+         * "Your plants are drunk! The moisture sensor recorded a value of {$m}"
+         *
+         * @param int $t - temperature
+         * @param float $m - moisture
+         * @return str $message - blank if nothing wrong
+         **/
+        public function detailedDiagnosis($t,$m){
+            $msg = '';
+            $roundTemp = round($t);
+
+            if(!$this->isTempWithinRange($t)){
+                if($t < $this->config->tempRange[0]){
+                    $msg .= "Your plants are too cold ";
+                }else if($t > $this->config->tempRange[1]){
+                    $msg .= "Your plants are too hot ";
+                }
+                $msg .= ". They're currently at {$roundTemp} degrees celsius.";
+            }
+
+            if(!$this->isMoistureWithinRange($m)){
+                if($m < $this->config->moistureRange[0]){
+                    $msg .= "Your plants could " . (!empty($msg) ? 'also' : '') . " use a drink...";
+                }else if($m > $this->config->moistureRange[1]){
+                    $msg .= "Your plants are " . (!empty($msg) ? 'also' : '') . " drunk!";
+                }
+                $msg .= " The moisture sensor recorded a value of {$m}";
+            }
+
+            if(empty($msg)){
+                $msg = "Your plants are happy. Good job!";
             }
 
             return $msg;
@@ -150,7 +195,6 @@ EOXML;
                             $oldStatus = $plantNurse->diagnose( $currentData->t, $currentData->m );
                             $newStatus = $plantNurse->diagnose( $t, $m );
 
-
                             if($oldStatus !== $newStatus){
                                 new RSSFeed($newStatus);
                             }
@@ -192,7 +236,7 @@ EOXML;
                     }else{
                         $plantNurse = new PlantNurse();
                         $currentData = json_decode($jsonData);
-                        $status = $plantNurse->diagnose( $currentData->t, $currentData->m );
+                        $status = $plantNurse->detailedDiagnosis( $currentData->t, $currentData->m );
                     }
 
 
