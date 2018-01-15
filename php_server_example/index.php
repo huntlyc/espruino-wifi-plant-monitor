@@ -1,45 +1,16 @@
 <?php
-    class RSSFeed{
-        public $stub =<<<EOXML
-<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
-<channel>
- <title>Plant Issues</title>
- <description>Shows any issues with any plants</description>
- <link></link>
- <lastBuildDate></lastBuildDate>
- <pubDate></pubDate>
- <ttl>1800</ttl>
-
- <item>
-  <title>Plant Issue</title>
-  <description></description>
-  <link></link>
-  <guid isPermaLink="false"></guid>
-  <pubDate></pubDate>
- </item>
-
-</channel>
-</rss>
-
-EOXML;
+    class AlertEmail{
         public function __construct($description){
             $config = json_decode(file_get_contents(realpath(dirname(__FILE__)) . '/config.json'));
             $link =  $config->endpoint . '?auth=' . $config->token;
-            $date = date(DATE_RSS);
+            $date = date('d/m/Y @ H:i');
 
-            $xml = simplexml_load_string($this->stub);
-
-            $xml->channel->link = $link;
-            $xml->channel->lastBuildDate = $date;
-            $xml->channel->pubDate = $date;
-
-            $xml->channel->item->description = $description;
-            $xml->channel->item->link = $link;
-            $xml->channel->item->guid = time();
-            $xml->channel->item->pubDate = $date;
-
-            file_put_contents(realpath(dirname(__FILE__)) . '/feed.rss', $xml->asXML());
+            @mail(
+                $recipient = $config->email_settings->recipint,
+                $subject   = "Plant Problem - {$date}",
+                $body      = $description,
+                $headers   = "FROM: {$config->email_settings->from}\r\n"
+            );
         }
     }
 
@@ -196,7 +167,7 @@ EOXML;
                             $newStatus = $plantNurse->diagnose( $t, $m );
 
                             if($oldStatus !== $newStatus){
-                                new RSSFeed($newStatus);
+                                new AlertEmail($plantNurse->detailedDiagnosis( $t, $m ));
                             }
 
 
