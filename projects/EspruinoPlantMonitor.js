@@ -23,6 +23,7 @@
  *
  **/
 
+var CONFIG = undefined;
 var CODE_DEBUG = false;
 
 function NetworkSave(data){
@@ -30,11 +31,10 @@ function NetworkSave(data){
 
     this.data = data;
 
-    var WIFI_NAME = "ESSID";
-    var WIFI_OPTIONS = { password : "WIFI_PWD" };
+
 
     this.wifi = require("EspruinoWiFi");
-    this.wifi.connect(WIFI_NAME, WIFI_OPTIONS, function(err) {
+    this.wifi.connect(CONFIG.wifi.name, CONFIG.wifi.options, function(err) {
         if (err) {
             if(CODE_DEBUG){
                 console.log("Connection error: "+err);
@@ -60,28 +60,12 @@ NetworkSave.prototype.jsonToQueryString = function(json) {
 NetworkSave.prototype.sendInfo = function(data){
     var _self = this;
 
-    data.auth = 'YOUR_SUPER_SECRET_TOKEN';
-
+    data.auth = CONFIG.plantEndpoint.secret_token;
     content = this.jsonToQueryString(data);
+    var endpoint = CONFIG.plantEndpoint;
+    endpoint.headers['Content-Length'] = content.length;
 
-
-    var options = {
-        host: 'endpointserver.tld', // host name
-        port: 80,            // (optional) port, defaults to 80
-        protocol: 'http:',   // optional protocol - https: or http:
-        //port: 443,            // (optional) port, defaults to 80
-        //protocol: 'https:',   // optional protocol - https: or http:
-        path: '/path/to/data/app/',           // path sent to server
-        method: 'POST',       // HTTP command sent to server (must be uppercase 'GET', 'POST', etc)
-
-
-        headers: {
-            "Content-Type":"application/x-www-form-urlencoded",
-            "Content-Length":content.length
-        } // (optional) HTTP headers
-    };
-
-    var req = require("http").request(options, function(res) {
+    var req = require("http").request(endpoint, function(res) {
         res.on('data', function(data) {
             if(CODE_DEBUG){
                 console.log("HTTP> "+data);
@@ -181,6 +165,7 @@ PlantMonitor.prototype.setupNextCheckInterval = function(){
 setTimeout(function(){
     if(CODE_DEBUG){
       console.log('starting');
-      var pm = new PlantMonitor();
     }
+    CONFIG = require('projectConfig').config;
+    var pm = new PlantMonitor();
 },1000);
