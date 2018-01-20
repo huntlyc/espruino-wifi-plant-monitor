@@ -23,7 +23,7 @@
  *
  **/
 
-var CONFIG = undefined;
+var CONFIG;
 var CODE_DEBUG = false;
 
 function NetworkSave(data){
@@ -31,7 +31,9 @@ function NetworkSave(data){
 
     this.data = data;
 
-
+    if(CODE_DEBUG){
+        console.log('Starting network request');
+    }
 
     this.wifi = require("EspruinoWiFi");
     this.wifi.connect(CONFIG.wifi.name, CONFIG.wifi.options, function(err) {
@@ -89,6 +91,10 @@ function PlantMonitor() {
     this.intervalVal = 60000; //1min
     this.currentTimeoutID = undefined;
 
+    //setup moisture power pin and make sure it's off
+    this.tempSensor.powerPin = B9;
+    digitalWrite(this.tempSensor.powerPin, 0);
+
     //Start monitoring
     this.monitor();
 }
@@ -119,35 +125,35 @@ PlantMonitor.prototype.monitor = function(){
 PlantMonitor.prototype.getSensorJSON = function(){
     var _self = this;
 
-    var plant = {
+    var plantData = {
         moisture: -1,
         temperature: -1
     };
 
-    plant.moisture = this.getMoistureLevel();
+    //Turn on soil sensor and wait for a second
+    if(CODE_DEBUG){
+        console.log('Turning on soil sensor');
+    }
+    digitalWrite(this.tempSensor.powerPin, 1);
 
+    setTimeout(function(){
+        if(CODE_DEBUG){
+            console.log('Gathering info');
+        }
+        plantData.moisture = _self.getMoistureLevel();
+        digitalWrite(_self.tempSensor.powerPin, 0);
 
-    //Get and echo current ambiant temperature
-    this.tempSensor.getTemp(function (temp) {
-        plant.temperature = temp;
-        new NetworkSave(plant);
-    });
+        //Get and echo current ambiant temperature
+        _self.tempSensor.getTemp(function (temp) {
+            plantData.temperature = temp;
 
+            if(CODE_DEBUG){
+                console.log('Plant data: {"moisture":' + plantData.moisture + ', "temperature":' + plantData.temperature + '}');
+            }
 
-};
-
-PlantMonitor.prototype.getSensorInfo = function(){
-    var _self = this;
-
-    var moistureLevel = this.getMoistureLevel();
-
-    //echo back moisture percentage
-    console.log("Soil is "+moistureLevel+"% saturated");
-
-    //Get and echo current ambiant temperature
-    this.tempSensor.getTemp(function (temp) {
-        console.log("amb tmp is "+temp+"°C");
-    });
+            new NetworkSave(plantData);
+        });
+    },1000);
 };
 
 PlantMonitor.prototype.setupNextCheckInterval = function(){
