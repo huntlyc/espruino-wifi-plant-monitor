@@ -12,11 +12,11 @@ Using the Espruino WIFI chip to log soil moisture and ambiant temperature.
 - 4.7K resistor - If you don't have one, get a [resistor pack](https://coolcomponents.co.uk/products/resistor-kit-1-4w-500-total)
 
 ## Basic Setup
-There are only 2 sensors in this project, both are run off a shared 3.3v rail and shared ground rail.
+There are only 2 sensors in this project, both share the ground rail.  The temperature sensor takes its power from the 3.3v rail, but the soil moisture sensor takes its power from the B9 pin which is turned on for one second before taking the reading and then turned off.  This is to conserve the sensor as keeping it on corrodes the sensor.
 
 ### Soil Sensor
 
-* VCC - 3.3v rail
+* VCC - straight to pin B9
 * GND - Ground rail
 * DO - _not used_
 * AO - straight to pin B0
