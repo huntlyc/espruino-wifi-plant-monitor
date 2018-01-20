@@ -1,7 +1,7 @@
 Espruino WIFI Plant Monitoring System
 =====================================
 
-Using the Espruino WIFI chip to log soil moisture and ambiant temperature.
+Using the Espruino WIFI chip to log soil moisture and ambient temperature.
 
 
 ## Required components/Shopping list:
@@ -30,18 +30,21 @@ With the rounded side facing ***away*** from left to right:
 
 ***Note:*** You need to put the 4.7K resistor between pins 1 & 2 (data and power)
 
+### Espruino network configuration
+The server endpoint details and token details are in a "module".  This is to allow any configuration updates (WiFi, or endpoint) to not be tracked by git.  The configuration file is modules/projectConfig.js.  Be sure to plug in your own details into there before running.
+
 ## Server software setup
 I've included a PHP example server application that takes this post data and saves it into a file - overwriting the file each time new data arrives.
 
-The Espruino code sends a standard POST with form data so any server side software that can read this respone can be used. The post data key value pairs are:
+The Espruino code sends a standard POST with form data so any server side software that can read this response can be used. The post data key value pairs are:
 
-* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the espruino application)
+* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the Espruino application)
 * __moisture__: integer value
 * __temperature__: double value
 
 To read the information back send a get request with the following parameters:
-* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the espruino application)
+* __auth__: "YOUR_SUPER_SECRET_TOKEN" (as defined in the Espruino application)
 * __output__: (optional) set to "json" for JSON output or leave blank for a human readable output.
 
 ## Bonus: Alexa application
-The sample alexa app in the "alexa_app" folder of this repo is pretty simple, it just queries the example php application and speaks the output whilst then running a second query to the php application for the raw JSON information which is then displayed on a card in the alexa mobile app.
+The sample Alexa app in the "alexa_app" folder of this repository is pretty simple, it just queries the example PHP application and speaks the output whilst then running a second query to the PHP application for the raw JSON information which is then displayed on a card in the Alexa mobile app.
